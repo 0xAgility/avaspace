@@ -23,3 +23,5 @@ const runMain = async () => {
 };
 
 runMain();
+
+// WavePortal Contract address:  0x74069d4b87f234ac62672234dD7D0fd917AE5e73
