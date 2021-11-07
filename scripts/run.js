@@ -19,8 +19,13 @@ const main = async () => {
     waveCount = await waveContract.getTotalWaves();
     console.log(waveCount.toNumber());
 
-    let waveTxn = await waveContract.wave('A message!');
-    await waveTxn.wait();
+    const waveTxn1 = await waveContract.wave('First message!');
+    await waveTxn1.wait();
+    const waveTxn2 = await waveContract.wave('Second message!');
+    await waveTxn2.wait();
+    const waveTxn3 = await waveContract.wave('Third message!');
+    await waveTxn3.wait();
+    
 
     contractBalance = await hre.ethers.provider.getBalance(waveContract.address);
     console.log(
