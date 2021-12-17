@@ -1,22 +1,70 @@
-//SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: UNLICENSED
+
 pragma solidity ^0.8.0;
+
 
 import "hardhat/console.sol";
 
 contract Greeter {
-    string private greeting;
+    uint256 totalWaves;
 
-    constructor(string memory _greeting) {
-        console.log("Deploying a Greeter with greeting:", _greeting);
-        greeting = _greeting;
+    uint256 private seed;
+
+    event NewWave(address indexed from, uint256 timestamp, string message);
+
+    struct Wave {
+        address waver;
+        string message;
+        uint256 timestamp;
     }
 
-    function greet() public view returns (string memory) {
-        return greeting;
+    Wave[] waves;
+
+    mapping(address => uint256) public lastWavedAt;
+
+    constructor() payable {
+        console.log("Constructed smart contract :)");
+
+        seed = (block.timestamp + block.difficulty) % 100;
     }
 
-    function setGreeting(string memory _greeting) public {
-        console.log("Changing greeting from '%s' to '%s'", greeting, _greeting);
-        greeting = _greeting;
+    function wave(string memory _message) public {
+        require(
+            lastWavedAt[msg.sender] + 15 minutes < block.timestamp,
+            "Wait 15m"
+        );
+        lastWavedAt[msg.sender] = block.timestamp;
+        
+        totalWaves += 1;
+        console.log("%s has waved!", msg.sender);
+        
+        waves.push(Wave(msg.sender, _message, block.timestamp));
+
+        seed = (block.difficulty + block.timestamp + seed) % 100;
+
+        if (seed <= 25) {
+            console.log("%s won!", msg.sender);
+
+            uint256 prizeAmount = 0.00001 ether;
+            require(
+                prizeAmount <= address(this).balance,
+                "Trying to withdraw more money than the contract has."
+            );
+            (bool success, ) = (msg.sender).call{value: prizeAmount}("");
+            require(success, "Failed to withdraw money from contract.");
+        }
+
+        emit NewWave(msg.sender, block.timestamp, _message);
+
+        
+    }
+
+    function getAllWaves() public view returns (Wave[] memory) {
+        return waves;
+    }
+
+    function getTotalWaves() public view returns (uint256) {
+        console.log("We have %d total waves!", totalWaves);
+        return totalWaves;
     }
 }
